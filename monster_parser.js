@@ -1,10 +1,10 @@
 import {readFile, writeFile} from 'fs/promises';
 
 const monsterFile = await readMonsters();
-const monsterData = await createMonsterFile();
+const monsterData = await createMonsterFile(monsterFile);
 writeToFile(monsterData);
 
-async function createMonsterFile() {
+async function createMonsterFile(monsterFile) {
     // DrakSlime  45 13 16 10 13  8 20 16 BeDragon  FireAir   SuckAir Slime
     return monsterFile.toString().split('\n').map( (monster) => {
         const params = monster.split(/\W+/);
