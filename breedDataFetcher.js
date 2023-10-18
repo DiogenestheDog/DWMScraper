@@ -8,15 +8,41 @@ writeToFile(words);
 async function getWikiList() {
     const res = await axios.get(`https://gamefaqs.gamespot.com/gbc/562719-dragon-warrior-monsters-2-taras-adventure/faqs/14383`);
     const $ = cheerio.load(res.data);
-    // first 20 li(s) are garbage
-    //const strs = $('li').text()//.split(" ").slice(500, 750);
-    // const defs = strs.map( str => {
-    //     return str.replace(/[0-9]/g, '');
-    // });
 
-    //console.log(strs);
+    // ,———————————————————————————————————————————————————.
+    // |  GREATDRAK       : FrigidAir IceSlash  SuckAll    |
+    // ‘———————————————————————————————————————————————————’
+    // ,---------------------------------------------------------------------.
+    // ¦ Found: Limbo Key World  - Outside Door Shrine                       ¦
+    // ¦----------------------------------+----------------------------------¦
+    // ¦ Base                             ¦ Mate                             ¦
+    // ¦----------------------------------+----------------------------------¦
+    // ¦ DRAGONFM                         ¦ Battlerex Gigantes MetalKing     ¦
+    // ¦                                  ¦ Unicorn Zapbird Centasaur        ¦
+    // ¦                                  ¦ Kingslime Spotking               ¦
+    // ¦                                  ¦ Whipbird                         ¦
+    // ¦----------------------------------+----------------------------------¦
+    // ¦ Base                             ¦ Mate                             ¦
+    // ¦----------------------------------+----------------------------------¦
+    // ¦ Dragon†5 or better               ¦ Dragon                           ¦
+    // ¦----------------------------------+----------------------------------¦
+    // ¦ DragonKid†5 or better            ¦ DragonKid                        ¦
+    // ‘----------------------------------^----------------------------------’
+
     const lines = $.text().split('\n');
     const mons = lines.filter( line => { return /\|  [A-Z]{2,}/.test(line); });
+    const breedingJSON = {};
+    for(let i = 0; i < lines.length; i++) {
+        // monster entry found
+        if(/\|  [A-Z]{2,}/.test(lines[i])) {
+            // grab monster name
+            const monster = lines[i].match(/\|  (\w*)/)[1];
+            // move down 5 lines and check if extra found row added
+            i = i+5;
+            console.log(monster);
+            console.log(lines[i].match(/¦ [^¦]* ¦ (.+)/)[1]);
+        }
+    }
     console.log(`lines:${lines.length}  mons${mons.length}`);
     return mons;
 }
