@@ -36,7 +36,7 @@ async function getBreedingList() {
         // monster entry found
         if(/\|  [A-Z]{2,}/.test(lines[i])) {
             // grab monster name
-            const monster = lines[i].match(/\|  (\w*)/)[1];
+            let monster = lines[i].match(/\|  (\w*)/)[1];
             breedingJSON[monster] = [];
             //console.log(monster);
             // move down 5 lines and check if extra found row added
@@ -44,11 +44,12 @@ async function getBreedingList() {
             // if line has the word base move down 2 lines
             if(lines[i].match(/Base/)) { i += 2; }
             // start looping breeding rows keeping in mind that some last multiple lines
-            for(let breedingTableCount = 0; /[A-Z]+/.test(lines[i]); breedingTableCount++) {
+            // 3 monsters are run on lines that need an excpetion
+            for(let breedingTableCount = 0; /[A-Z]+/.test(lines[i]) && !/GORAGO|ONIONO|AQUARELLA/.test(lines[i]); breedingTableCount++) {
                 // sometimes he adds a base mate row in the middle of a monster entry
 
-                console.log(/[A-Z]+/.test(lines[i]));;
-                console.log("I'm here");
+                // console.log(/[A-Z]+/.test(lines[i]));;
+                // console.log("I'm here");
                 if(lines[i].match(/Base/)) { i += 2;}
                 // initialize empty table array
                 breedingJSON[monster][breedingTableCount] = {};
@@ -56,19 +57,43 @@ async function getBreedingList() {
                 breedingJSON[monster][breedingTableCount]["mateParents"] = [];
                 // go down lines until we hit --- which mark the end of the table
                 while(!/---/.test(lines[i])) {
-                    console.log(lines[i]);
+                    // console.log(lines[i]);
                     
                     let [_, baseMonsters, mateMonsters] = lines[i].split("¦");
-                    console.log(`baseMonsters is: ${baseMonsters}`);
-                    console.log(`mateMonsters is: ${mateMonsters}`);
-                    breedingJSON[monster][breedingTableCount].baseParents = breedingJSON[monster][breedingTableCount].baseParents.concat(baseMonsters.trim().split(" "));
-                    breedingJSON[monster][breedingTableCount].mateParents = breedingJSON[monster][breedingTableCount].mateParents.concat(mateMonsters.trim().split(" "));
-                    console.log(`btc is ${JSON.stringify(breedingJSON[monster][breedingTableCount].mateParents)}`);
-                    console.log(`mate parents is ${JSON.stringify(breedingJSON[monster][breedingTableCount].mateParents.concat(mateMonsters.trim().split(" ")))}`);
+                    // console.log(`baseMonsters for ${monster} is: ${baseMonsters}`);
+                    // console.log(`mateMonsters for ${monster} is: ${mateMonsters}`);
+                    // console.log(`mate parents is ${JSON.stringify(breedingJSON[monster][breedingTableCount].mateParents.concat(mateMonsters.trim().split(" ")))}`);
+                    
+                    // some rows are empty so initialize to empty array if string is empty
+                    baseMonsters = baseMonsters.trim() ? baseMonsters.trim().split(" ") : [];
+                    mateMonsters = mateMonsters.trim() ? mateMonsters.trim().split(" ") : [];
+                    breedingJSON[monster][breedingTableCount].baseParents = breedingJSON[monster][breedingTableCount].baseParents.concat(baseMonsters);
+                    breedingJSON[monster][breedingTableCount].mateParents = breedingJSON[monster][breedingTableCount].mateParents.concat(mateMonsters);
+                    // console.log(`btc is ${JSON.stringify(breedingJSON[monster][breedingTableCount].mateParents)}`);
                     i++;
                 }
                 i++;
             }
+            // these monsters are separate because they're formatted irregularly
+            // luckily they share the same mistake
+            if( /GORAGO|ONIONO|AQUARELLA/.test(lines[i])) { 
+                monster = lines[i].match(/\w+/)[0];
+                console.log(monster);
+                i+=5;
+                // initialize empty table array
+                breedingJSON[monster] = [];
+                breedingJSON[monster][0] = {};
+                breedingJSON[monster][0]["baseParents"] = [];
+                breedingJSON[monster][0]["mateParents"] = [];
+                    
+                let [_, baseMonsters, mateMonsters] = lines[i].split("¦");
+                baseMonsters = baseMonsters.trim() ? baseMonsters.trim().split(" ") : [];
+                mateMonsters = mateMonsters.trim() ? mateMonsters.trim().split(" ") : [];
+                breedingJSON[monster][0].baseParents = breedingJSON[monster][0].baseParents.concat(baseMonsters);
+                breedingJSON[monster][0].mateParents = breedingJSON[monster][0].mateParents.concat(mateMonsters);
+                i++;
+            }
+                             
         }
     }
     return breedingJSON;
